@@ -341,19 +341,19 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
-  		var alreadyCalled = [];
+  		var alreadyCalled = {};
   		var results=[];
 
   		return function() {
-  			if (_.indexOf(alreadyCalled, arguments)===-1) {
-  				alreadyCalled.push(arguments);
-  				results.push(func.apply(this, arguments));
-  				return results[_.indexOf(alreadyCalled,arguments)];
-  			} else {
-  				return results[_.indexOf(alreadyCalled,arguments)];
-
+  			if (alreadyCalled[JSON.stringify(arguments)]===undefined) {
+  				var called = func.apply(this, arguments);
+  				alreadyCalled[JSON.stringify(arguments)]=called;
 
   			}
+
+
+  			return alreadyCalled[JSON.stringify(arguments)];
+
   		}
 
   };
@@ -364,21 +364,28 @@
   // The arguments for the original function are passed after the wait
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
+  
   _.delay = function(func, wait) {
-
-  	var start = new Date().getTime();;
-  	var end = start + wait;
-  	alert(start);
-  	alert(end);
-  	var tester = false;
+/*
+  	var begin = new Date();
+  	
+  	var start = begin.getMilliseconds();
+  	
+  	var end = start + wait; 
+  	
+  	var tester = true;
   	while (tester) {
-  		if (new Date().getTime()>end) {
-  			tester=true;
+  		var now = new Date().getMilliseconds();
+  		if (now>end) {
+  			tester = false;
   		}
 
   	}
-  	
   		func.apply(this, arguments);	
+  	
+  	
+
+  */
   	
   	
 
@@ -397,6 +404,24 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+  	
+  	var sourceArray = [];
+    _.each(array,function(ar){
+    	sourceArray.push(ar);
+    });
+
+  	var shuffled = [];
+
+
+  	while (sourceArray.length>0) {
+
+  		var randomNumber = Math.floor(Math.random()*sourceArray.length);
+  		shuffled.push(sourceArray.splice(randomNumber, 1)[0] );
+  		
+  	}
+  	
+  	return shuffled;
+	
   };
 
 
