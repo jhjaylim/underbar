@@ -365,7 +365,7 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   
-  _.delay = function(func, wait) {
+  _.delay = function(func, wait) {// this part of code is commented out because the new Date() command is giving error on browser while it is working in console.
 /*
   	var begin = new Date();
   	
