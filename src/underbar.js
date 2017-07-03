@@ -366,7 +366,10 @@
   // call someFunction('a', 'b') after 500ms
   
   _.delay = function(func, wait) {// this part of code is commented out because the new Date() command is giving error on browser while it is working in console.
-/*
+
+  	var time = new Date();
+  	console.log(new Date());
+/* 
   	var begin = new Date();
   	
   	var start = begin.getMilliseconds();
@@ -384,8 +387,8 @@
   		func.apply(this, arguments);	
   	
   	
-
-  */
+*/
+  
   	
   	
 
@@ -436,6 +439,16 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+
+	return _.map(collection, function(col){
+
+		if (typeof functionOrKey === 'string') {
+		  return col[functionOrKey].apply(col, args);	
+		} else {
+			return functionOrKey.apply(col, args);
+		}
+
+	});
   };
 
   // Sort the object's values by a criterion produced by an iterator.
@@ -443,6 +456,54 @@
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+
+
+  	for (var i = 0; i<collection.length;i++) {
+
+  		for (var j = i+1; j<collection.length; j++) {
+  			if (iterator === undefined) {// numeric case
+  				if (collection[i]=== undefined) {
+  					var temp = collection[j];
+  					collection[j] = collection[i];
+  					collection[i] = temp;
+  				} else {
+  					if (collection[j]>collection[i]) {
+  						var temp = collection[j];
+  						collection[j] = collection[i];
+  						collection[i] = temp;
+  					}
+  				}	
+
+  			} else {
+  				if (typeof iterator === 'string') {
+  					if (collection[i][iterator]> collection[j][iterator]) {
+  						var temp = collection[j];
+  						collection[j] = collection[i];
+  						collection[i] = temp;
+  					}  					
+  				} else {
+
+  					if (iterator(collection[i])===undefined) {
+  						var temp = collection[j];
+  						collection[j] = collection[i];
+  						collection[i] = temp;
+  					} else if (iterator(collection[i])> iterator(collection[j])) {
+  						var temp = collection[j];
+  						collection[j] = collection[i];
+  						collection[i] = temp;
+  					}  		
+  				}
+
+
+  			}
+  		}	
+
+  		
+  	}
+  	return collection;
+
+  
+
   };
 
   // Zip together two or more arrays with elements of the same index
@@ -451,6 +512,25 @@
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+  	var result = [];
+  	var maxIndex = 0;
+  	for (var i = 0; i<arguments.length; i++) {
+  		if (arguments[i].length>maxIndex) {
+  			maxIndex = i;
+  		}
+  	}
+
+  	for (var i = 0; i< arguments[maxIndex].length; i++) {
+  		var temp = [];
+		for (var j = 0; j<arguments.length;j++) {
+			temp.push(arguments[j][i]);
+
+		}
+  		result.push(temp);
+  	}
+  	
+  	return result;
+
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
@@ -458,16 +538,97 @@
   //
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
+  	
+  	//console.log([1].concat([2]));
+  	var resultArray = [];
+  	for (var i = 0; i<nestedArray.length; i++) {
+  		
+  		if (Array.isArray(nestedArray[i])) {
+  			
+  			myConcat(resultArray,_.flatten(nestedArray[i]));
+  			
+  		} else {
+  			
+  			resultArray.push(nestedArray[i]);
+  		}
+  	}
+  	return resultArray;
+
   };
+  var myConcat = function(arr1, arr2) {
+  	_.each(arr2, function(ar){
+
+  		arr1.push(ar);
+  	});
+  	return arr1;
+  }
 
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
+
+  	
+  	var resultArray = [];
+
+  	for (var i = 0; i<arguments[0].length; i++) {
+  		var shared = true;
+  		for (var j = 0; j<myLength(arguments[j]); j++) {
+  			if (_.indexOf(arguments[j], arguments[0][i])===-1) {
+  				shared = false;
+  			}
+  		}
+  		if (shared) {
+  			resultArray.push(arguments[0][i]);
+  		}
+  		
+  	}
+  	return resultArray;
+
   };
+  var myLength = function(arr) {
+  	var count = 0;
+  	if (Array.isArray(arr)) {
+  		var next = arr[count];
+  		while (next) {
+  			count++;
+  			next = arr[count];
+  		 
+  		}
+  	}
+  	
+  	return count;
+
+  }
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
+  	var resultArray = [];
+  	
+  	var args = arguments;
+  	for (var i = 0; i<args[0].length; i++) {
+  		var shared = true;
+  		for (var j = 1; j<myLength(args[j]); j++) {
+  			var temp = _.every(args[j], function(arr){
+  				
+  				return arr!== args[0][i];
+  			});
+  			if (!temp) {
+  				shared = temp;
+  			}
+  		}
+  		
+  		if (shared) {
+  			
+  			resultArray.push(args[0][i]);
+  		}
+  		
+  	}
+  	return resultArray;
+
+
+
+
   };
 
   // Returns a function, that, when invoked, will only be triggered at most once
@@ -476,5 +637,31 @@
   //
   // Note: This is difficult! It may take a while to implement.
   _.throttle = function(func, wait) {
+
+
+
+
+
   };
 }());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
